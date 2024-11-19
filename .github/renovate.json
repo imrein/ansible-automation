@@ -1,0 +1,21 @@
+{
+    "regexManagers": [
+      {
+        "fileMatch": ["\\.yml$"],
+        "matchStrings": [
+          "# Renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\n.*_version: (?<currentValue>.*)"
+        ],
+          "datasourceTemplate": "github-releases"
+      }
+    ],
+    "packageRules": [
+      {
+          "matchPackageNames": [
+              "go-gitea/gitea"
+          ],
+          "matchUpdateTypes": ["minor", "patch"],
+          "automerge": true,
+          "ignoreTests": true
+      }
+    ]
+  }
