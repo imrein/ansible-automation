@@ -1,0 +1,79 @@
+---
+# Installing Gitea
+- name: Install Gitea if not installed
+  block:
+    - name: Install needed packages
+      dnf:
+        name:
+          - mariadb-server
+          - git
+        state: present
+      notify: Restart MariaDB
+
+    - name: Flush handlers
+      meta: flush_handlers
+
+    - name: Setup Gitea database
+      command: >
+        mysql -uroot -e "
+        CREATE USER IF NOT EXISTS '{{ gitea_db_user }}'@localhost IDENTIFIED BY '{{ gitea_db_pass }}';
+        CREATE DATABASE IF NOT EXISTS {{ gitea_db_name }};
+        GRANT ALL PRIVILEGES ON {{ gitea_db_name }}.* TO '{{ gitea_db_user }}'@localhost IDENTIFIED BY '{{ gitea_db_pass }}';
+        FLUSH PRIVILEGES;"
+
+    - name: Create Gitea user
+      user:
+        name: "{{ gitea_db_user }}"
+        shell: /usr/bin/bash
+        create_home: true
+
+    - name: Download Gitea binary
+      get_url:
+        url: "https://github.com/go-gitea/gitea/releases/download/v{{ gitea_version }}/gitea-{{ gitea_version }}-{{ gitea_package_type }}"
+        dest: "/usr/local/bin/gitea"
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Create Gitea config directory
+      file:
+        state: directory
+        path: /etc/gitea
+        owner: root
+        group: "{{ gitea_db_user }}"
+        mode: '0770'
+
+    - name: Create Gitea app.ini file
+      template:
+        src: app.j2
+        dest: /etc/gitea/app.ini
+        owner: "{{ gitea_db_user }}"
+        group: "{{ gitea_db_user }}"
+        mode: '0600'
+
+    - name: Create required directories for Gitea
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ gitea_db_user }}"
+        group: "{{ gitea_db_user }}"
+        mode: '0750'
+      loop:
+        - /var/lib/gitea
+        - /var/lib/gitea/custom
+        - /var/lib/gitea/data
+        - /var/lib/gitea/log
+
+    - name: Setup service file
+      copy:
+        src: gitea.service
+        dest: /etc/systemd/system/gitea.service
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Restart Gitea
+
+    - name: Gitea enable + restart
+      command: /bin/true
+      notify: Restart Gitea
+  when: gitea_install and ansible_facts.services["gitea.service"] is not defined

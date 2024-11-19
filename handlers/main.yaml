@@ -1,0 +1,19 @@
+---
+# Handlers
+- name: Restart Jenkins
+  service:
+    name: jenkins
+    enabled: yes
+    state: restarted
+
+- name: Restart Gitea
+  service:
+    name: gitea
+    enabled: yes
+    state: restarted
+
+- name: Restart MariaDB
+  service:
+    name: mariadb
+    enabled: yes
+    state: restarted

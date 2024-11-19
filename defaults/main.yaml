@@ -1,0 +1,16 @@
+---
+# Jenkins
+jenkins_install: true
+jenkins_user: jenkins
+
+# Gitea
+gitea_install: true
+# Renovate: datasource=github-releases depName=go-gitea/gitea
+gitea_version: 1.22.3
+gitea_db_name: gitea
+gitea_db_user: git
+gitea_db_pass: git
+gitea_package_type: linux-amd64
+lfs_jwt_secret: xxx
+jwt_secret: xyz
+internal_token: zyx

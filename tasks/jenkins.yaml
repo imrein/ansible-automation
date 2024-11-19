@@ -1,0 +1,47 @@
+---
+# Installing Jenkins
+- name: Install Jenkins if not installed
+  block:
+    - name: Create Jenkins user
+      user:
+        name: "{{ jenkins_user }}"
+        shell: /usr/bin/false
+        create_home: true
+
+    - name: Install Jenkins repository
+      yum_repository:
+        name: jenkins-repo
+        description: Jenkins
+        baseurl: 'https://pkg.jenkins.io/redhat-stable/'
+        gpgcheck: no
+
+    - name: Install Opentofu repository
+      yum_repository:
+        name: opentofu-repo
+        description: Opentofu
+        baseurl: 'https://packages.opentofu.org/opentofu/tofu/rpm_any/rpm_any/$basearch'
+        gpgcheck: no
+
+    - name: Install needed packages
+      dnf:
+        name:
+          - fontconfig
+          - java-17-openjdk
+          - jenkins
+          - ansible-core
+          - tofu
+        state: present
+
+    - name: Check if needed ansible galaxy collections are installed
+      shell: 'ansible-galaxy collection list --collections-path /usr/share/ansible/collections/ansible_collections/ | grep "ansible.posix\|community.general"'
+      register: check_ansible_collections
+      ignore_errors: true
+
+    - name: Install ansible galaxy collections
+      command: '/usr/bin/ansible-galaxy collection install ansible.posix community.general -p /usr/share/ansible/collections/ansible_collections/'
+      when: check_ansible_collections is failed
+
+    - name: Jenkins enable + restart
+      command: /bin/true
+      notify: Restart Jenkins
+  when: jenkins_install and ansible_facts.services["jenkins.service"] is not defined
