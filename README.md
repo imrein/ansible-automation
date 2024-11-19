@@ -2,7 +2,9 @@
 
 <p align="center">
 <img src="https://ansible.readthedocs.io/projects/ansible-core/devel/_static/images/Ansible-Mark-RGB_White.png" width=100>
+&nbsp;
 <img src="https://www.jenkins.io/images/logos/jenkins/jenkins.svg" width=75>
+&nbsp;
 <img src="https://gitea.com/assets/img/logo.svg" width=100>
 </p>
 
